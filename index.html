@@ -1,162 +1,120 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-BR">
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <title>Telegram Mini Apps Vanilla JS Sample App</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Apostas UEFA Nations League</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        body {
-            --bg-color: var(--tg-theme-bg-color);
-            font: 12px/18px "Lucida Grande", "Lucida Sans Unicode", Arial, Helvetica, Verdana, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--tg-theme-text-color);
-            margin: 48px 24px;
-            padding: 0;
-            color-scheme: var(--tg-color-scheme);
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
         }
-
-        a {
-            color: var(--tg-theme-link-color);
-        }
-        #viewport {
-            position: fixed;
-            left: 0;
-            right: 0;
-            top: 0;
-            height: var(--tg-viewport-stable-height, 100vh);
-            pointer-events: none;
-            transition: all .2s ease;
-        }
-        #viewport:after {
-            content: '';
-            display: block;
-            position: absolute;
-            left: 0;
-            right: 0;
-            top: 0;
-            bottom: 0;
-            border-width: 4px;
-            border-style: solid;
-            border-image: linear-gradient(45deg, rgba(64, 224, 208, .5), rgba(173, 255, 47, .5)) 1;
-        }
-
-        #viewport-params-size,
-        #viewport-params-expand {
-            content: attr(text);
-            position: absolute;
-            display: inline-block;
-            background: var(--tg-theme-link-color, rgb(64, 224, 208));
-            right: 4px;
-            left: auto;
-            font-size: 8px;
-            padding: 4px;
-            vertical-align: top;
-        }
-        #viewport-params-size {
-            top: 4px;
-        }
-        #viewport-params-expand {
-            top: 30px;
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
         }
     </style>
 </head>
-
-<body>
-    <main>
-        <div align="center">
-            <a href="https://ton.org/"><img width="48" src="./assets/tapps.png" alt="logo of telegram web apps"></a>
+<body class="bg-gray-100 text-gray-800">
+    <div role="main" class="container mx-auto px-4 py-8">
+        <div class="text-center mb-8">
+            <a href="https://ton.org/">
+                <img src="./assets/tapps.png" alt="logo of telegram web apps" class="w-12 h-12 mx-auto">
+            </a>
         </div>
-        <h1>Modals</h1>
-        <button onclick="Telegram.WebApp.showAlert('Hello World!');">Launch Alert</button>
-        <button onclick="showPopup();">Launch Popup</button>
 
-        <h1>Links</h1>
-        <ul>
-            <li>
-                <a href="javascript:Telegram.WebApp.openTelegramLink('https://t.me/bet_dos_cria_bot/interface');">Open link within Telegram</a>
-            </li>
-            <li>
-                <a href="javascript:Telegram.WebApp.openLink('https://ton.org/');">Open link in external browser</a>
-            </li>
-            <li>
-                <a href="javascript:Telegram.WebApp.openLink('https://telegra.ph/api',{try_instant_view:true});">Open link inside Telegram webview</a>
-            </li>
-        </ul>
+        <h1 class="text-3xl font-bold text-center mb-8">Apostas UEFA Nations League</h1>
 
-        <h1>Buttons</h1>
-        <button onclick="Telegram.WebApp.expand();">Expand Webview</button>
-        <button onclick="toggleMainButton();">Toggle Main Button</button>
-    </main>
-    <div id="viewport"></div>
-    <div id="viewport-params-size"></div>
-    <div id="viewport-params-expand"></div>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+        <div id="pages" class="space-y-8">
+            <!-- Página de Criar Wallet -->
+            <div id="create-wallet" class="bg-white p-6 rounded-lg shadow-md fade-in">
+                <h2 class="text-2xl font-semibold mb-4">Criar Wallet</h2>
+                <input type="email" placeholder="Seu e-mail" class="w-full p-2 mb-4 border rounded" id="email-input">
+                <button id="create-wallet-btn" class="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600 transition">Criar Wallet com Magic Link</button>
+            </div>
+
+            <!-- Página de Entrar em uma Partida -->
+            <div id="join-match" class="bg-white p-6 rounded-lg shadow-md fade-in" style="display: none;">
+                <h2 class="text-2xl font-semibold mb-4">Entrar em uma Partida</h2>
+                <input type="text" placeholder="Código da partida" class="w-full p-2 mb-4 border rounded" id="match-code-input">
+                <button id="join-match-btn" class="w-full bg-green-500 text-white p-2 rounded hover:bg-green-600 transition">Entrar na Partida</button>
+            </div>
+
+            <!-- Página de Ver Partidas Existentes -->
+            <div id="existing-matches" class="bg-white p-6 rounded-lg shadow-md fade-in" style="display: none;">
+                <h2 class="text-2xl font-semibold mb-4">Partidas Existentes</h2>
+                <ul id="match-list" class="space-y-4">
+                    <!-- As partidas serão adicionadas aqui dinamicamente -->
+                </ul>
+            </div>
+        </div>
+
+        <div class="mt-8 space-y-4">
+            <button id="toggle-page" class="w-full bg-purple-500 text-white p-2 rounded hover:bg-purple-600 transition">Próxima Página</button>
+            <button id="expand-webview" class="w-full bg-gray-500 text-white p-2 rounded hover:bg-gray-600 transition">Expandir Webview</button>
+            <button id="toggle-main-button" class="w-full bg-gray-500 text-white p-2 rounded hover:bg-gray-600 transition">Toggle Main Button</button>
+        </div>
+    </div>
+
     <script>
-        // Init TWA
-        Telegram.WebApp.ready();
+        $(document).ready(function() {
+            let currentPage = 0;
+            const pages = ['#create-wallet', '#join-match', '#existing-matches'];
 
-        // Event occurs whenever theme settings are changed in the user's Telegram app (including switching to night mode).
-        Telegram.WebApp.onEvent('themeChanged', function() {
-            document.documentElement.className = Telegram.WebApp.colorScheme;
-        });
+            function showPage(index) {
+                $(pages[currentPage]).hide();
+                $(pages[index]).show().addClass('fade-in');
+                currentPage = index;
+            }
 
-        // Show main button
-        Telegram.WebApp.MainButton.setParams({
-            text: 'Main Button'
-        });
-        Telegram.WebApp.MainButton.onClick(function () {
-            Telegram.WebApp.showAlert('Main Button was clicked')
-        });	
-        Telegram.WebApp.MainButton.show();
+            $('#toggle-page').click(function() {
+                showPage((currentPage + 1) % pages.length);
+            });
 
-        // Function to call showPopup API
-        function showPopup() {
-            Telegram.WebApp.showPopup({
-                title: 'Title',
-                message: 'Some message',
-                buttons: [
-                    {id: 'link', type: 'default', text: 'Open ton.org'},
-                    {type: 'cancel'},
-                ]
-            }, function(btn) {
-                if (btn === 'link') {
-                    Telegram.WebApp.openLink('https://ton.org/');
+            $('#expand-webview').click(function() {
+                Telegram.WebApp.expand();
+            });
+
+            $('#toggle-main-button').click(function() {
+                if (Telegram.WebApp.MainButton.isVisible) {
+                    Telegram.WebApp.MainButton.hide();
+                } else {
+                    Telegram.WebApp.MainButton.setText("Main Button").show();
                 }
             });
-        };
 
-        // Function to toggle main TWA button
-        function toggleMainButton() {
-            if (Telegram.WebApp.MainButton.isVisible) {
-                Telegram.WebApp.MainButton.hide();
-            } else {
-                Telegram.WebApp.MainButton.show();
-            }
-        };
+            $('#create-wallet-btn').click(function() {
+                // Implementar lógica de criação de wallet
+                alert('Funcionalidade de criar wallet a ser implementada');
+            });
 
-        function setViewportData() {
-            var sizeEl = document.getElementById('viewport-params-size');
-            sizeEl.innerText = 'width: ' + window.innerWidth + ' x ' + 
-                'height: ' + Telegram.WebApp.viewportStableHeight;
+            $('#join-match-btn').click(function() {
+                // Implementar lógica de entrar na partida
+                alert('Funcionalidade de entrar na partida a ser implementada');
+            });
 
-            var expandEl = document.querySelector('#viewport-params-expand');
-            expandEl.innerText = 'Is Expanded: ' + (Telegram.WebApp.isExpanded ? 'true' : 'false');
-        }
+            // Exemplo de adição de partidas à lista
+            const matches = [
+                { date: "2024-09-05", time: "13:00", league: "Liga C", group: "Grupo C1", teams: "Azerbaijão vs Suécia" },
+                { date: "2024-09-05", time: "15:45", league: "Liga A", group: "Grupo A1", teams: "Portugal vs Croácia" },
+                // Adicione mais partidas conforme necessário
+            ];
 
-        Telegram.WebApp.setHeaderColor('secondary_bg_color');
+            matches.forEach(match => {
+                $('#match-list').append(`
+                    <li class="bg-gray-100 p-4 rounded">
+                        <p class="font-bold">${match.date} ${match.time}</p>
+                        <p>${match.league} - ${match.group}</p>
+                        <p>${match.teams}</p>
+                        <button class="mt-2 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition">Apostar</button>
+                    </li>
+                `);
+            });
 
-        setViewportData();
-        Telegram.WebApp.onEvent('viewportChanged', setViewportData);
-
-        Telegram.WebApp.onEvent('themeChanged', function() {
-            document.body.setAttribute('style', '--bg-color:' + Telegram.WebApp.backgroundColor);
+            showPage(0); // Iniciar na página de criar wallet
         });
-
     </script>
-
-    <!-- Eruda is console for mobile browsers -->
-    <script src="https://cdn.jsdelivr.net/npm/eruda"></script>
-    <script>eruda.init();</script>
 </body>
 </html>
