@@ -1,5 +1,4 @@
 let web3auth = null;
-let walletServicesPlugin = null;
 
 (async function init() {
   $(".btn-logged-in").hide();
@@ -27,26 +26,22 @@ let walletServicesPlugin = null;
   // IMP START - SDK Initialization
   const privateKeyProvider = new window.EthereumProvider.EthereumPrivateKeyProvider({ config: { chainConfig } });
 
-  web3auth = new window.Modal.Web3Auth({
+  web3auth = new window.NoModal.Web3AuthNoModal({
     clientId,
     privateKeyProvider,
     // web3AuthNetwork: "sapphire_mainnet",
     web3AuthNetwork: "sapphire_devnet",
   });
 
-  // Add wallet service plugin
-  walletServicesPlugin = new window.WalletServicesPlugin.WalletServicesPlugin();
-  web3auth.addPlugin(walletServicesPlugin); // Add the plugin to web3auth
+  const openloginAdapter = new window.OpenloginAdapter.OpenloginAdapter();
+  web3auth.configureAdapter(openloginAdapter);
 
-  await web3auth.initModal();
+  await web3auth.init();
   // IMP END - SDK Initialization
 
   if (web3auth.connected) {
     $(".btn-logged-in").show();
     $(".btn-logged-out").hide();
-    if (web3auth.connected === "openlogin") {
-      $("#sign-tx").show();
-    }
   } else {
     $(".btn-logged-out").show();
     $(".btn-logged-in").hide();
@@ -56,8 +51,9 @@ let walletServicesPlugin = null;
 $("#login").click(async function (event) {
   try {
     // IMP START - Login
-    await web3auth.connect();
-    // IMP END - Login
+    await web3auth.connectTo("openlogin", {
+      loginProvider: "google",
+    }); // IMP END - Login
     $(".btn-logged-out").hide();
     $(".btn-logged-in").show();
     uiConsole("Logged in Successfully!");
@@ -105,15 +101,6 @@ $("#get-balance").click(async function (event) {
     uiConsole(balance);
   } catch (error) {
     console.error(error.message);
-  }
-});
-
-$("#show-wallet").click(async function (event) {
-  // print status in console
-  uiConsole(walletServicesPlugin.status);
-  if (walletServicesPlugin.status == "connected") {
-    // check if wallet is connected
-    await walletServicesPlugin.showWalletUi();
   }
 });
 
