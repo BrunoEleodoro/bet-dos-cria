@@ -30,7 +30,8 @@ let walletServicesPlugin = null;
   web3auth = new window.Modal.Web3Auth({
     clientId,
     privateKeyProvider,
-    web3AuthNetwork: "sapphire_mainnet",
+    // web3AuthNetwork: "sapphire_mainnet",
+    web3AuthNetwork: "sapphire_devnet",
   });
 
   // Add wallet service plugin
